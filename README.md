@@ -1,26 +1,28 @@
-# Pipeline de Dados com IoT e Docker
+# 📊 Pipeline de Dados IoT com Python, PostgreSQL e Streamlit
 
-## Descrição do Projeto
-Este projeto implementa um pipeline de dados para processar leituras de temperatura de dispositivos IoT, armazenar os dados em um banco PostgreSQL executando em Docker e disponibilizar visualizações interativas com Streamlit.
+## 📌 Descrição do Projeto
 
-O objetivo é demonstrar, na prática, a integração entre IoT, Big Data, banco de dados relacional, conteinerização e visualização de dados. :contentReference[oaicite:0]{index=0}
+Este projeto tem como objetivo desenvolver um pipeline completo de dados IoT, simulando a coleta, processamento, armazenamento e visualização de dados de sensores de temperatura.
 
----
-
-## Tecnologias Utilizadas
-- Python
-- Pandas
-- SQLAlchemy
-- PostgreSQL
-- Docker
-- Streamlit
-- Plotly
-- Git/GitHub
+A solução integra diferentes tecnologias para demonstrar um fluxo de dados desde a ingestão até a geração de insights por meio de um dashboard interativo.
 
 ---
 
-## Estrutura do Projeto
+## 🚀 Tecnologias Utilizadas
 
+* Python
+* PostgreSQL
+* Streamlit
+* SQLAlchemy
+* Pandas
+* Docker
+* Supabase (como alternativa em nuvem)
+
+---
+
+## ⚙️ Estrutura do Projeto
+
+```
 pipeline-iot-docker/
 │
 ├── data/
@@ -33,145 +35,144 @@ pipeline-iot-docker/
 ├── dashboard/
 │   └── dashboard.py
 │
-├── docs/
-│   └── screenshots/
-│
-├── requirements.txt
 ├── README.md
-└── .gitignore
+└── requirements.txt
+```
 
+---
 
+## 🔄 Pipeline de Dados
 
+1. **Coleta de Dados**
+   Os dados são simulados através de um arquivo CSV contendo:
 
+   * device_id
+   * temperature
+   * timestamp
 
-##Fonte dos Dados
+2. **Ingestão de Dados**
+   O script `load_data.py` realiza a leitura do CSV e envia os dados para o banco PostgreSQL.
 
-Dataset do Kaggle:
-Temperature Readings: IoT Devices
+3. **Processamento (SQL)**
+   Foram criadas 3 views para análise:
 
-Link: adicione aqui o link do dataset baixado no Kaggle.
+   * Média de temperatura por dispositivo
+   * Quantidade de registros por hora
+   * Temperatura máxima e mínima por dia
 
-##Pré-requisitos
+4. **Visualização**
+   O dashboard foi desenvolvido com Streamlit, exibindo gráficos interativos.
 
--Antes de executar o projeto, instale:
+---
 
-Python 3.10+
-Docker Desktop
-Git
-Instalação do Ambiente
+## 🗄️ Banco de Dados
 
-#Clonar o repositório
-git clone URL_DO_SEU_REPOSITORIO
-cd pipeline-iot-docker
+Durante o desenvolvimento, a arquitetura foi planejada para execução local com Docker.
+Devido a limitações de virtualização, foi utilizada a plataforma Supabase para hospedar o banco PostgreSQL na nuvem, mantendo toda a lógica do projeto.
 
-#Criar ambiente virtual
-python -m venv venv
+---
 
-# Ativar ambiente virtual
--Windows
-venv\Scripts\activate
+## 📊 Views SQL
 
--Linux/Mac
-source venv/bin/activate
+### 🔹 Média de temperatura por dispositivo
 
-# Instalar dependências
+```sql
+SELECT device_id, AVG(temperature) as avg_temp
+FROM temperature_readings
+GROUP BY device_id;
+```
+
+### 🔹 Registros por hora
+
+```sql
+SELECT EXTRACT(HOUR FROM timestamp::timestamp) as hora, COUNT(*) as total
+FROM temperature_readings
+GROUP BY hora;
+```
+
+### 🔹 Temperatura máxima e mínima por dia
+
+```sql
+SELECT DATE(timestamp::timestamp) as data,
+MAX(temperature) as max_temp,
+MIN(temperature) as min_temp
+FROM temperature_readings
+GROUP BY data;
+```
+
+---
+
+## ▶️ Como Executar o Projeto
+
+### 1. Instalar dependências
+
+```bash
 pip install -r requirements.txt
+```
 
-#Dependências do Projeto
+### 2. Configurar conexão com banco
 
-Arquivo requirements.txt:
+Editar a string de conexão nos arquivos Python com suas credenciais do banco.
 
-pandas
-psycopg2-binary
-sqlalchemy
-streamlit
-plotly
+---
 
-# Subindo o PostgreSQL com Docker
-docker run --name postgres-iot -e POSTGRES_PASSWORD=sua_senha -e POSTGRES_DB=iotdb -p 5432:5432 -d postgres
+### 3. Carregar os dados
 
-Se quiser iniciar novamente um container já criado:
-docker start postgres-iot
-
-#Configuração do Banco
-
--Credenciais usadas no exemplo:
-
-Usuário: postgres
-Senha: sua_senha
-Banco: iotdb
-Porta: 5432
-
-# Execução do Pipeline de Carga
-
-O script abaixo lê o CSV, trata os dados e envia para o PostgreSQL:
+```bash
 python src/load_data.py
+```
 
-# Criação das Views SQL
+---
 
--Após inserir os dados, execute os comandos SQL do arquivo src/create_views.sql.
+### 4. Executar o dashboard
 
--Você pode executar via DBeaver, pgAdmin ou terminal SQL.
+```bash
+cd dashboard
+python -m streamlit run dashboard.py
+```
 
-# Views Criadas
-1. Média de temperatura por dispositivo
+---
 
-Permite identificar dispositivos com temperaturas médias mais altas ou mais baixas.
+## 📈 Resultados
 
-2. Leituras por hora
+O dashboard apresenta:
 
-Mostra a distribuição do volume de leituras ao longo do dia.
+* Média de temperatura por dispositivo
+* Volume de dados por hora
+* Variação de temperatura ao longo dos dias
 
-3. Temperaturas máximas e mínimas por dia
+---
 
-Ajuda a visualizar a variação térmica diária dos dispositivos.
+## 💡 Insights
 
-#Executando o Dashboard
-streamlit run dashboard/dashboard.py
+* Diferenças de comportamento entre dispositivos
+* Identificação de horários com maior volume de dados
+* Variações térmicas ao longo do tempo
 
-# Capturas de Tela
+---
 
-Adicione na pasta docs/screenshots/ imagens do dashboard em funcionamento.
+## 🌍 Aplicações Reais
 
-Exemplos:
+Este projeto pode ser aplicado em:
 
-gráfico média por dispositivo
-gráfico leituras por hora
-gráfico máximas e mínimas por dia
+* Monitoramento industrial
+* Cidades inteligentes
+* Controle ambiental
+* IoT em agricultura
 
+---
 
-# Insights Obtidos
+## 📸 Demonstração
 
-Dispositivos com temperaturas fora do padrão podem indicar falhas ou necessidade de manutenção.
-Horários com mais leituras podem revelar picos de atividade.
-Acompanhar máximas e mínimas diárias permite entender tendências de aquecimento e resfriamento.
+<img width="1909" height="1013" alt="Captura de tela 2026-04-14 221819" src="https://github.com/user-attachments/assets/d6ded24a-ef8e-4275-a41b-fae29f6a2010" />
 
-# Possíveis Aplicações Reais
-Monitoramento agrícola
-Controle térmico em ambientes industriais
-Monitoramento de sensores em cidades inteligentes
-Gestão de equipamentos em data centers
+<img width="693" height="924" alt="imagem geral10" src="https://github.com/user-attachments/assets/6b20dd3e-083f-4641-9d41-de6f76b7945a" />
 
+---
 
-# Comandos Git Utilizados
--Inicializar repositório
-git init
+## 👨‍💻 Autor
 
--Adicionar arquivos
-git add .
-
--Criar commit
-git commit -m "Projeto inicial: Pipeline de Dados IoT"
-
--Adicionar repositório remoto
-git remote add origin URL_DO_SEU_REPOSITORIO
-
--Enviar para o GitHub
-git push -u origin main
-
--Atualizar repositório local
-git pull
-
-Conclusão
-
-Este projeto demonstra a construção de um pipeline completo de dados utilizando Python, Docker, PostgreSQL e Streamlit, integrando conceitos modernos de IoT, armazenamento e visualização de dados de forma prática e escalável.
+Projeto desenvolvido para fins acadêmicos na disciplina de
+**Disruptive Architectures: IoT, Big Data e IA**
+- Adoraria receber dicas: viviamorimgomes0@gmail.com
+---
